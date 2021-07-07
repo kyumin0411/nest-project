@@ -9,51 +9,56 @@ import {
   Query,
 } from '@nestjs/common';
 import { CatsService } from './cats.service';
-import { CreateCatDto } from './dto/create-cat.dto';
-import { UpdateCatDto } from './dto/update-cat.dto';
+import { CreateCatDto } from '../dto/create-cat.dto';
+import { UpdateCatDto } from '../dto/update-cat.dto';
 
 @Controller('cat')
 export class CatsController {
   constructor(private catsService: CatsService) {}
 
+  @Get()
+  async show() {
+    return await this.catsService.findAll();
+  }
+
   @Post()
   async create(@Body() createCatDto: CreateCatDto) {
-    this.catsService.create(createCatDto);
-    console.log('Create Cat : ');
-    console.log(createCatDto);
-    return 'This action adds a new cat';
+    return await this.catsService.create(createCatDto);
   }
 
-  @Get('show')
-  findAll() {
-    const result = this.catsService.findAll();
-    console.log('Show Cat Array :');
-    console.log(result);
-    return result;
+  @Delete('/:name')
+  async deleteOne(@Param('name') name: string) {
+    return await this.catsService.deleteOne(name);
   }
 
-  @Get('find')
-  findOne(@Query('name') name: string) {
-    const result_cat = this.catsService.findOne(name);
-    console.log('Find Result cat :');
-    console.log(result_cat);
-    return `This action returns cat with the name ${name}, 
-    {name : ${result_cat.name}, age:${result_cat.age}, color:${result_cat.color}}`;
+  @Delete()
+  async deleteOneByQuery(@Query('name') name: string) {
+    return await this.catsService.deleteOne(name);
   }
 
-  @Put('update/:name')
-  Update(@Param('name') name: string, @Body() updateCatDto: UpdateCatDto) {
-    this.catsService.update(name, updateCatDto);
-    console.log('Update Result : ');
-    console.log(this.catsService.findAll());
-    return `This action updates cat information of name ${name}`;
+  @Delete()
+  async deleteAll() {
+    console.log('Path is ok (delete)');
+    return await this.catsService.deleteAll();
   }
 
-  @Delete('delete/:name')
-  Delete(@Param('name') name: string) {
-    this.catsService.delete(name);
-    console.log('Delete Result : ');
-    console.log(this.catsService.findAll());
-    return `This action deletes cat with name ${name}`;
+  @Put('/:name')
+  async updateOne(
+    @Param('name') name: string,
+    @Body() updateCatDto: UpdateCatDto,
+  ) {
+    console.log('Path is ok (update)');
+    console.log('updated name:', name);
+    console.log('updated Cat :', updateCatDto);
+    return await this.catsService.updateOne(name, updateCatDto);
+  }
+
+  @Put()
+  async updateOneByQuery(
+    @Query('name') name: string,
+    @Body() updateCatDto: UpdateCatDto,
+  ) {
+    console.log('updated by Query!');
+    return await this.catsService.updateOne(name, updateCatDto);
   }
 }

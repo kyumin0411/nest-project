@@ -1,34 +1,37 @@
 import { Injectable } from '@nestjs/common';
-import { Cat } from './interface/cat.interface';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Cat, CatDocument } from '../schemas/cat.schema';
+import { CreateCatDto } from '../dto/create-cat.dto';
+import { UpdateCatDto } from '../dto/update-cat.dto';
 
 @Injectable()
 export class CatsService {
-  private cats: Cat[] = [];
+  constructor(@InjectModel(Cat.name) private catModel: Model<CatDocument>) {}
 
-  create(cat: Cat) {
-    this.cats.push(cat);
+  async create(createCatDto: CreateCatDto): Promise<string> {
+    await this.catModel.create(createCatDto);
+    return '생성 성공';
   }
 
-  findAll(): Cat[] {
-    return this.cats;
+  async findAll(): Promise<Cat[]> {
+    return await this.catModel.find();
   }
 
-  findOne(name: string): Cat {
-    return this.cats.find((elem) => elem.name === name);
+  async deleteOne(name: string) {
+    await this.catModel.findOneAndDelete({ name: name });
+    return '하나만 삭제 성공';
   }
 
-  update(name: string, cat: Cat) {
-    this.cats = this.cats.map((value) => {
-      if (value.name === name) {
-        return cat;
-      }
-      return value;
-    });
+  async deleteAll() {
+    await this.catModel.deleteMany({});
+    console.log('Delete .....!');
+    return '전체 삭제 성공';
   }
 
-  delete(name: string) {
-    this.cats = this.cats.filter((value) =>
-      value.name === name ? false : true,
-    );
+  async updateOne(name: string, updateCatDto: UpdateCatDto) {
+    await this.catModel.updateOne({ name: name }, updateCatDto);
+    console.log('Updating....!');
+    return '변경 성공';
   }
 }
